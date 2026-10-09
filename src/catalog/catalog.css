@@ -38,7 +38,6 @@ html {
   top: 0;
   transform-origin: 0 50%;
   transform-style: preserve-3d;
-  will-change: transform;
 }
 .face {
   position: absolute;
@@ -63,7 +62,6 @@ html {
   z-index: 4;
   pointer-events: none;
   opacity: 0.55;
-  mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .4  0 0 0 0 .34  0 0 0 .09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 .gutter,
@@ -163,7 +161,6 @@ html {
   transition:
     width 0.35s cubic-bezier(0.3, 1.4, 0.5, 1),
     height 0.35s cubic-bezier(0.3, 1.4, 0.5, 1);
-  filter: drop-shadow(2px 3px 3px rgba(0, 0, 0, 0.18));
 }
 .corner-fold[data-side="left"] .fold {
   left: 0;
@@ -432,5 +429,23 @@ html {
     height: 842px;
     transform: scale(1.3338);
     transform-origin: 0 0;
+  }
+}
+
+/* Celular / navegadores embutidos (WhatsApp, Instagram): menos camadas e
+   efeitos — o iOS derruba a página quando a memória de GPU estoura. */
+@media (pointer: coarse), (max-width: 760px) {
+  .face::after {
+    display: none;
+  }
+  .face {
+    box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.6);
+  }
+  .book {
+    perspective: 1800px;
+  }
+  .hotspot::before {
+    animation: none;
+    opacity: 0.7;
   }
 }

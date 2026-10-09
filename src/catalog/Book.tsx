@@ -71,6 +71,8 @@ export const Book = forwardRef<BookApi, Props>(function Book(
   } | null>(null);
 
   const maxTurned = single ? leaves - 1 : leaves;
+  const reach = single ? 1 : 2; // folhas mantidas montadas em volta da atual
+  const windowRef = useRef<number[]>([turned]); // centros: folhas montadas = centro ± reach
 
   /* -------------------------------------------------------- aplica no DOM */
   const apply = useCallback(
@@ -84,13 +86,21 @@ export const Book = forwardRef<BookApi, Props>(function Book(
       el.style.setProperty("--s", Math.sin((Math.abs(a) * Math.PI) / 180).toFixed(3));
       // em modo simples a folha virada sai do quadro; escondê-la evita sobreposição
       el.style.visibility = single && a <= -179.5 ? "hidden" : "visible";
+      // Só as folhas perto da página atual existem como camada 3D. Manter as 14
+      // vivas estoura a memória de GPU no iPhone (Safari derruba a página).
+      const near = windowRef.current.some((c) => Math.abs(k - c) <= reach);
+      el.style.display = live || near ? "" : "none";
     },
-    [leaves, single],
+    [leaves, single, reach],
   );
 
-  useLayoutEffect(() => {
+  const applyAll = useCallback(() => {
     for (let k = 0; k < leaves; k++) apply(k);
   }, [apply, leaves]);
+
+  useLayoutEffect(() => {
+    applyAll();
+  }, [applyAll]);
 
   /* ------------------------------------------------------------- animação */
   const animate = useCallback(
@@ -121,17 +131,21 @@ export const Book = forwardRef<BookApi, Props>(function Book(
 
   const commit = useCallback(
     (target: number, flips: Promise<void>[]) => {
+      const cur = turnedRef.current;
+      windowRef.current = [cur, target];
       turnedRef.current = target;
       setTurned(target);
       onTurn?.(visibleOf(target));
       const id = ++pending.current;
       Promise.all(flips).then(() => {
         if (id !== pending.current) return;
+        windowRef.current = [target];
+        applyAll();
         setSettled(target);
         onSettle?.(visibleOf(target));
       });
     },
-    [onTurn, onSettle, visibleOf],
+    [onTurn, onSettle, visibleOf, applyAll],
   );
 
   const flipTo = useCallback(
@@ -140,14 +154,27 @@ export const Book = forwardRef<BookApi, Props>(function Book(
       const cur = turnedRef.current;
       if (target === cur) return;
       onFlipStart?.();
-      const ks: number[] = [];
-      if (target > cur) for (let k = cur; k < target; k++) ks.push(k);
+      const fwd = target > cur;
+      let ks: number[] = [];
+      if (fwd) for (let k = cur; k < target; k++) ks.push(k);
       else for (let k = cur - 1; k >= target; k--) ks.push(k);
+      // Saltos longos (índice, miniaturas): as folhas do meio vão direto para o
+      // destino e só a de cima/baixo anima — leve no celular e sem "metralhadora".
+      if (ks.length > (single ? 1 : 3)) {
+        const keep = single ? (fwd ? [cur] : [target]) : [ks[0], ks[ks.length - 1]];
+        for (const k of ks) {
+          if (keep.includes(k)) continue;
+          animating.current.delete(k);
+          angles.current[k] = fwd ? -180 : 0;
+        }
+        ks = keep;
+      }
       const stagger = Math.min(110, 420 / ks.length);
-      const flips = ks.map((k, i) => animate(k, target > cur ? -180 : 0, i * stagger, DURATION));
+      const flips = ks.map((k, i) => animate(k, fwd ? -180 : 0, i * stagger, DURATION));
       commit(target, flips);
+      applyAll();
     },
-    [animate, commit, maxTurned, onFlipStart],
+    [animate, commit, maxTurned, onFlipStart, single, applyAll],
   );
 
   useImperativeHandle(
@@ -241,7 +268,7 @@ export const Book = forwardRef<BookApi, Props>(function Book(
   };
 
   /* ------------------------------------------------------------ renderização */
-  const near = (k: number) => Math.abs(k - turned) <= 2 || Math.abs(k - settled) <= 2;
+  const near = (k: number) => Math.abs(k - turned) <= reach || Math.abs(k - settled) <= reach;
   const shift = single ? 0 : turned === 0 ? -PAGE_W / 2 : turned === leaves ? PAGE_W / 2 : 0;
   const isActive = (p: number | null) => p !== null && visibleOf(settled).includes(p) && settled === turned;
 
