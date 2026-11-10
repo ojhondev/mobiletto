@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Clock, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { Clock, Mail, Map as MapaIcone, MapPin, MessageCircle, Phone } from "lucide-react";
 import { Faq, Rotulo } from "@/components/site/Blocos";
 import { FormContato } from "@/components/site/Formularios";
 import { getSecoes, linkWhatsapp, segmentosPublicados } from "@/lib/cms/dados";
@@ -19,6 +19,7 @@ export default async function FaleConosco() {
     { icone: Phone, rotulo: "Telefone", valor: contato.telefone, href: `tel:${contato.telefone.replace(/\D/g, "")}` },
     { icone: MapPin, rotulo: "Fábrica e showroom", valor: [contato.endereco, contato.cidade].filter(Boolean).join(" · ") },
     { icone: Clock, rotulo: "Horário", valor: contato.horario },
+    { icone: MapaIcone, rotulo: "Área de atendimento", valor: contato.regiao },
   ].filter((c) => c.valor);
 
   return (

@@ -47,23 +47,27 @@ const faqPadrao = [
   },
   {
     p: "Vocês fazem o projeto do ambiente?",
-    r: "Sim. A partir da planta e do briefing, nossa equipe desenvolve o layout e o projeto 3D do espaço, com a especificação de cada peça e acabamento.",
+    r: "Sim. A partir da planta e do briefing, desenvolvemos o layout e o projeto 3D do espaço — com apoio de inteligência artificial quando o projeto pede — em até 3 dias, com a especificação de cada peça e acabamento.",
+  },
+  {
+    p: "Vocês fazem a montagem e a instalação?",
+    r: "Sim. Além de fabricar, fazemos a montagem e a instalação do mobiliário no local, no cronograma da sua obra.",
   },
   {
     p: "Posso trabalhar com o meu arquiteto?",
     r: "Claro. Trabalhamos lado a lado com arquitetos e designers de interiores, fabricando o mobiliário especificado no projeto deles ou desenvolvendo soluções em conjunto.",
   },
   {
-    p: "Qual é o prazo de fabricação?",
-    r: "O prazo depende do volume e do nível de personalização. Ele é definido na proposta e alinhado ao cronograma da sua obra.",
+    p: "Qual é o prazo?",
+    r: "O projeto 3D fica pronto em até 3 dias. Na região Sudeste, atendemos com prazo de 30 dias. O cronograma final é confirmado na proposta, alinhado à sua obra.",
   },
   {
-    p: "Vocês atendem fora da cidade?",
-    r: "Sim. Entregamos e instalamos em todo o território nacional, com equipe própria de montagem.",
+    p: "Quais regiões vocês atendem?",
+    r: "Atendemos toda a região Sudeste — São Paulo, Rio de Janeiro, Minas Gerais e Espírito Santo — com prazo de 30 dias.",
   },
   {
-    p: "Existe garantia e pós-venda?",
-    r: "Sim. Todos os produtos têm garantia e um canal de pós-venda para ajustes, reposições e ampliações do ambiente.",
+    p: "Como funcionam a garantia e o pós-venda?",
+    r: "Nossos móveis têm 5 anos de garantia contra defeitos de fabricação. Danos causados por mau uso não são cobertos pela garantia e são orçados à parte. O pós-venda faz parte da nossa forma de trabalhar: seguimos ao seu lado depois da entrega.",
   },
 ];
 
@@ -82,6 +86,7 @@ export const SECOES = {
       { tipo: "texto", nome: "endereco", rotulo: "Endereço" },
       { tipo: "texto", nome: "cidade", rotulo: "Cidade — UF" },
       { tipo: "texto", nome: "horario", rotulo: "Horário de atendimento" },
+      { tipo: "texto", nome: "regiao", rotulo: "Área de atendimento" },
       { tipo: "texto", nome: "instagram", rotulo: "Instagram (link)" },
       { tipo: "texto", nome: "linkedin", rotulo: "LinkedIn (link)" },
       { tipo: "texto", nome: "mensagemWhatsapp", rotulo: "Mensagem inicial do WhatsApp" },
@@ -95,6 +100,7 @@ export const SECOES = {
       endereco: "Endereço da fábrica e showroom",
       cidade: "Cidade — UF",
       horario: "Segunda a sexta, 8h às 18h",
+      regiao: "Toda a região Sudeste (SP, RJ, MG e ES)",
       instagram: "https://instagram.com/",
       linkedin: "https://linkedin.com/",
       mensagemWhatsapp: "Olá! Gostaria de falar sobre um projeto de mobiliário corporativo.",
@@ -108,7 +114,7 @@ export const SECOES = {
       { tipo: "texto", nome: "texto", rotulo: "Texto" },
       { tipo: "texto", nome: "link", rotulo: "Link" },
     ],
-    padrao: { texto: "Projeto 3D sem custo para empresas — solicite o seu", link: "/fale-conosco?assunto=projeto" },
+    padrao: { texto: "Projeto 3D do seu espaço em até 3 dias — solicite o seu", link: "/fale-conosco?assunto=projeto" },
   }),
   seo: def({
     pagina: "Geral",
@@ -122,7 +128,7 @@ export const SECOES = {
     padrao: {
       titulo: "Mobiletto · Mobiliário corporativo sob medida",
       descricao:
-        "Mobiliário corporativo para escritórios, empresas, recepções, hotéis e restaurantes. Projeto, fabricação própria e instalação — do simples ao sofisticado.",
+        "Mobiliário corporativo para escritórios, empresas, recepções, hotéis e restaurantes na região Sudeste. Projeto 3D, fabricação, montagem e instalação — do simples ao sofisticado.",
       imagem: "/brand/mobiletto-assinatura-azul.png",
     },
   }),
@@ -144,7 +150,7 @@ export const SECOES = {
     padrao: {
       titulo: "Mobiliário corporativo, do projeto à instalação.",
       texto: "Escritórios, empresas, recepções e hotéis. Projetamos, fabricamos e instalamos — do simples ao sofisticado.",
-      botaoPrimario: "Solicitar projeto gratuito",
+      botaoPrimario: "Solicitar projeto 3D",
       linkPrimario: "/fale-conosco?assunto=projeto",
       botaoSecundario: "Conheça as soluções",
       linkSecundario: "#solucoes",
@@ -194,8 +200,8 @@ export const SECOES = {
           imagem: "/images/recepcao-marmore.jpg",
         },
         {
-          titulo: "Entrega e instalação",
-          texto: "Equipe própria de montagem, cronograma alinhado com a obra e pós-venda depois da entrega.",
+          titulo: "Montagem e instalação",
+          texto: "Fazemos a montagem e a instalação no cronograma da obra, com 5 anos de garantia e pós-venda depois da entrega.",
           imagem: "/images/cadeiras-conferencia.jpg",
         },
       ],
@@ -268,11 +274,11 @@ export const SECOES = {
     ],
     padrao: {
       titulo: "Do simples ao sofisticado, no prazo da sua obra.",
-      texto: "Um único parceiro para projetar, fabricar e instalar. Menos fornecedores, mais controle sobre o resultado.",
+      texto: "Um único parceiro para projetar, fabricar, montar e instalar. Prazo de 30 dias em toda a região Sudeste.",
       rotulo: "Projeto 3D em até",
-      valor: "5",
-      unidade: "dias úteis",
-      nota: "após o envio da planta",
+      valor: "3",
+      unidade: "dias",
+      nota: "com apoio de IA quando o projeto pede",
     },
   }),
   "home.numeros": def({
@@ -294,8 +300,8 @@ export const SECOES = {
     padrao: {
       itens: [
         { valor: "100%", rotulo: "Fabricação própria", texto: "Do projeto à montagem, sem terceirizar o que define a qualidade." },
-        { valor: "5 anos", rotulo: "de garantia estrutural", texto: "Estruturas e marcenaria pensadas para o uso corporativo intenso." },
-        { valor: "+1.000", rotulo: "ambientes mobiliados", texto: "Escritórios, recepções, hotéis e restaurantes em todo o país." },
+        { valor: "5 anos", rotulo: "de garantia", texto: "Contra defeitos de fabricação, com pós-venda depois da entrega." },
+        { valor: "30 dias", rotulo: "de prazo no Sudeste", texto: "Atendemos SP, RJ, MG e ES, com montagem e instalação no local." },
       ],
     },
   }),
@@ -375,13 +381,13 @@ export const SECOES = {
         },
         {
           titulo: "Projeto 3D",
-          texto: "Desenvolvemos layout, especificação e acabamentos, com visualização 3D para aprovação.",
+          texto: "Layout, especificação e acabamentos em 3D — com apoio de IA quando o projeto pede — em até 3 dias para aprovação.",
           imagem: "/produtos/layout-open-space-lounge.jpg",
         },
         { titulo: "Fabricação", texto: "Produção na nossa estrutura, com controle de qualidade em cada etapa.", imagem: "/images/marcenaria-ferramentas.jpg" },
         {
-          titulo: "Instalação",
-          texto: "Montagem com equipe própria, no cronograma da obra, e acompanhamento depois da entrega.",
+          titulo: "Montagem e instalação",
+          texto: "Montagem e instalação no local, no cronograma da obra, com 5 anos de garantia e pós-venda depois da entrega.",
           imagem: "/images/escritorio-open.jpg",
         },
       ],
@@ -451,10 +457,12 @@ export const SECOES = {
     campos: [
       { tipo: "textarea", nome: "garantia", rotulo: "Nota de garantia", linhas: 2 },
       { tipo: "textarea", nome: "personalizacao", rotulo: "Nota de personalização", linhas: 2 },
+      { tipo: "textarea", nome: "projeto", rotulo: "Nota de projeto 3D", linhas: 2 },
       { tipo: "textarea", nome: "aviso", rotulo: "Aviso sobre imagens e medidas", linhas: 2 },
     ],
     padrao: {
-      garantia: "Garantia de fábrica e pós-venda com equipe própria.",
+      garantia: "5 anos de garantia contra defeitos de fabricação, com montagem e instalação.",
+      projeto: "Projeto 3D do ambiente em até 3 dias.",
       personalizacao: "Medidas, cores e acabamentos podem ser adaptados ao seu projeto.",
       aviso: "Imagens ilustrativas. Medidas de referência; confirme as dimensões finais na proposta.",
     },

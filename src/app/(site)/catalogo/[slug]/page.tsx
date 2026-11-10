@@ -108,7 +108,7 @@ export default async function ProdutoPage({ params }: PageProps<"/catalogo/[slug
               {[
                 { icone: SlidersHorizontal, texto: txt.personalizacao },
                 { icone: ShieldCheck, texto: txt.garantia },
-                { icone: Ruler, texto: "Projeto 3D do ambiente sem custo para empresas." },
+                { icone: Ruler, texto: txt.projeto },
               ]
                 .filter((x) => x.texto)
                 .map(({ icone: Icone, texto }) => (

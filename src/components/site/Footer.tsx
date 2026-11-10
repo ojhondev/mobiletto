@@ -60,6 +60,7 @@ export async function Footer() {
               </a>
               <span>{contato.telefone}</span>
               <span className="text-pedra">{contato.horario}</span>
+              {contato.regiao && <span className="text-pedra">{contato.regiao}</span>}
             </div>
           </div>
         </div>
