@@ -1,35 +1,37 @@
-import type { Metadata } from "next";
-import { Fraunces, Instrument_Sans, Geist_Mono, Geist } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Instrument_Sans } from "next/font/google";
 import "./globals.css";
-import { cn } from "@/lib/utils";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
-const display = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  axes: ["SOFT", "opsz"],
-});
 
 const sans = Instrument_Sans({
   variable: "--font-instrument",
   subsets: ["latin"],
-});
-
-const mono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Mobiletto",
-  description: "Móveis para projetos. Venda exclusiva para empresas.",
+  metadataBase: new URL("https://www.mobiletto.com.br"),
+  title: {
+    default: "Mobiletto · Mobiliário corporativo sob medida",
+    template: "%s · Mobiletto",
+  },
+  description:
+    "Mobiliário corporativo para escritórios, empresas, recepções, hotéis e restaurantes. Projeto, fabricação própria e instalação — do simples ao sofisticado.",
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    siteName: "Mobiletto",
+    images: ["/brand/mobiletto-assinatura-azul.png"],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1d344b",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="pt-BR" className={cn("h-full", "antialiased", display.variable, sans.variable, mono.variable, "font-sans", geist.variable)}>
-      <body className="min-h-full">{children}</body>
+    <html lang="pt-BR" className={`${sans.variable} h-full`}>
+      <body className="min-h-full font-sans">{children}</body>
     </html>
   );
 }

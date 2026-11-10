@@ -42,3 +42,6 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# material bruto da identidade (manual em PDF, extrações)
+/.brand-src
