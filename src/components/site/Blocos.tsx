@@ -73,7 +73,7 @@ export function FaixaFoto({
 }) {
   return (
     <section className="relative isolate flex min-h-[540px] items-center overflow-hidden bg-tinta text-white md:min-h-[620px]">
-      <Image src={imagem} alt="" fill sizes="100vw" className="-z-10 object-cover" />
+      {imagem && <Image src={imagem} alt="" fill sizes="100vw" className="-z-10 object-cover" />}
       <div className="absolute inset-0 -z-10 bg-linear-to-r from-black/75 via-black/45 to-black/10" />
       <div className="shell py-20">
         <p className="reveal max-w-[22ch] text-h2">{titulo}</p>

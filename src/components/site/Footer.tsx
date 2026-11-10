@@ -1,33 +1,33 @@
 import Image from "next/image";
 import Link from "next/link";
-import { contato, segmentos, whatsappUrl } from "@/content/site";
+import { getSecao, linkWhatsapp, segmentosPublicados } from "@/lib/cms/dados";
 
-const colunas = [
-  {
-    titulo: "Empresa",
-    links: [
-      { href: "/sobre-nos", label: "Sobre nós" },
-      { href: "/cases", label: "Cases" },
-      { href: "/trabalhe-conosco", label: "Trabalhe conosco" },
-      { href: "/politica-de-privacidade", label: "Privacidade" },
-    ],
-  },
-  {
-    titulo: "Soluções",
-    links: segmentos.map((s) => ({ href: `/cases?segmento=${s.id}`, label: s.nome })),
-  },
-  {
-    titulo: "Contato",
-    links: [
-      { href: "/fale-conosco", label: "Fale conosco" },
-      { href: "/fale-conosco?assunto=orcamento", label: "Solicitar orçamento" },
-      { href: "/catalogo", label: "Catálogo" },
-      { href: whatsappUrl(), label: "WhatsApp", externo: true },
-    ],
-  },
-];
+const OJHONDEV_WHATSAPP = "https://wa.me/5514998570045";
 
-export function Footer() {
+export async function Footer() {
+  const [contato, segs] = await Promise.all([getSecao("contato"), segmentosPublicados()]);
+  const colunas = [
+    {
+      titulo: "Empresa",
+      links: [
+        { href: "/sobre-nos", label: "Sobre nós" },
+        { href: "/cases", label: "Cases" },
+        { href: "/trabalhe-conosco", label: "Trabalhe conosco" },
+        { href: "/politica-de-privacidade", label: "Privacidade" },
+      ],
+    },
+    { titulo: "Soluções", links: segs.map((s) => ({ href: `/cases?segmento=${s.slug}`, label: s.nome })) },
+    {
+      titulo: "Contato",
+      links: [
+        { href: "/fale-conosco", label: "Fale conosco" },
+        { href: "/fale-conosco?assunto=orcamento", label: "Solicitar orçamento" },
+        { href: "/catalogo", label: "Catálogo" },
+        { href: linkWhatsapp(contato.whatsapp, contato.mensagemWhatsapp), label: "WhatsApp", externo: true },
+      ],
+    },
+  ];
+
   return (
     <footer className="bg-white">
       <div className="shell grid gap-12 pt-20 pb-14 md:grid-cols-[1fr_auto]">
@@ -63,18 +63,12 @@ export function Footer() {
             </div>
           </div>
         </div>
-        <Image
-          src="/brand/mobiletto-simbolo-azul.png"
-          alt=""
-          width={800}
-          height={875}
-          sizes="160px" className="h-[150px] w-auto md:h-[168px]"
-        />
+        <Image src="/brand/mobiletto-simbolo-azul.png" alt="" width={800} height={875} sizes="160px" className="h-[150px] w-auto md:h-[168px]" />
       </div>
       <div className="shell">
-        <div className="flex flex-col gap-4 border-t border-linha py-6 text-[13px] sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 border-t border-linha py-6 text-[13px] lg:flex-row lg:items-center lg:justify-between">
           <span>Mobiletto © 2026 — Todos os direitos reservados</span>
-          <div className="flex items-center gap-5">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <a href={contato.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-azul">
               Instagram
             </a>
@@ -84,6 +78,17 @@ export function Footer() {
             <Link href="/politica-de-privacidade" className="hover:text-azul">
               Política de privacidade
             </Link>
+            <Link href="/painel" className="hover:text-azul">
+              Painel administrativo
+            </Link>
+            <a
+              href={OJHONDEV_WHATSAPP}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-[family-name:var(--font-plex)] tracking-normal text-pedra transition-colors hover:text-tinta"
+            >
+              Desenvolvido por <strong className="font-bold text-tinta">@ojhondev</strong>
+            </a>
           </div>
         </div>
       </div>

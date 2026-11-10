@@ -1,10 +1,11 @@
 "use server";
 
+import { db, schema } from "@/lib/db";
+import { enviarArquivo } from "@/lib/armazenamento";
+
 /**
- * Formulários do site (Fale conosco, Trabalhe conosco, Linha especial).
- *
- * ⚠️ Por enquanto as mensagens são só validadas: o envio/armazenamento real
- * (Neon + e-mail para a equipe) entra na etapa de publicação, junto com o admin.
+ * Formulários públicos (Fale conosco, Trabalhe conosco, Linha especial).
+ * Tudo é gravado em `mensagens` e aparece na caixa de entrada do painel.
  */
 
 export type EstadoForm = {
@@ -23,20 +24,20 @@ const CV_TIPOS = [
 ];
 const CV_MAX = 4 * 1024 * 1024;
 
-const txt = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
+const txt = (fd: FormData, k: string, max = 4000) => String(fd.get(k) ?? "").trim().slice(0, max);
 
 export async function enviarContato(_prev: EstadoForm, fd: FormData): Promise<EstadoForm> {
   if (txt(fd, "website")) return { ok: true, mensagem: "Recebemos sua mensagem." }; // honeypot anti-spam
 
   const dados = {
-    nome: txt(fd, "nome"),
-    empresa: txt(fd, "empresa"),
-    email: txt(fd, "email"),
-    telefone: txt(fd, "telefone"),
-    segmento: txt(fd, "segmento"),
-    assunto: txt(fd, "assunto"),
+    nome: txt(fd, "nome", 200),
+    empresa: txt(fd, "empresa", 200),
+    email: txt(fd, "email", 200),
+    telefone: txt(fd, "telefone", 60),
+    segmento: txt(fd, "segmento", 80),
+    assunto: txt(fd, "assunto", 80),
     mensagem: txt(fd, "mensagem"),
-    origem: txt(fd, "origem"),
+    origem: txt(fd, "origem", 80),
   };
   const erros: Record<string, string> = {};
   if (dados.nome.length < 2) erros.nome = "Informe seu nome.";
@@ -45,38 +46,68 @@ export async function enviarContato(_prev: EstadoForm, fd: FormData): Promise<Es
   if (!fd.get("consentimento")) erros.consentimento = "É preciso autorizar o contato.";
   if (Object.keys(erros).length) return { ok: false, mensagem: "Revise os campos destacados.", erros, valores: dados };
 
-  // TODO(publicação): gravar no Neon e notificar a equipe por e-mail.
-  console.info("[contato]", { assunto: dados.assunto, segmento: dados.segmento, origem: dados.origem });
+  try {
+    await db.insert(schema.mensagens).values({
+      tipo: dados.origem === "linha-especial" ? "linha-especial" : "contato",
+      nome: dados.nome,
+      email: dados.email,
+      telefone: dados.telefone,
+      empresa: dados.empresa,
+      assunto: dados.assunto,
+      segmento: dados.segmento,
+      mensagem: dados.mensagem,
+      extra: { origem: dados.origem },
+    });
+  } catch (e) {
+    console.error("[contato]", e);
+    return { ok: false, mensagem: "Não foi possível enviar agora. Tente novamente ou fale pelo WhatsApp.", valores: dados };
+  }
 
-  return {
-    ok: true,
-    mensagem: `Obrigado, ${dados.nome.split(" ")[0]}! Recebemos sua mensagem e nossa equipe retorna em até 1 dia útil.`,
-  };
+  return { ok: true, mensagem: `Obrigado, ${dados.nome.split(" ")[0]}!` };
 }
 
 export async function enviarCandidatura(_prev: EstadoForm, fd: FormData): Promise<EstadoForm> {
   if (txt(fd, "website")) return { ok: true, mensagem: "Recebemos sua candidatura." };
 
-  const nome = txt(fd, "nome");
-  const email = txt(fd, "email");
-  const vaga = txt(fd, "vaga");
+  const valores = {
+    nome: txt(fd, "nome", 200),
+    email: txt(fd, "email", 200),
+    vaga: txt(fd, "vaga", 120),
+    telefone: txt(fd, "telefone", 60),
+    cidade: txt(fd, "cidade", 120),
+    link: txt(fd, "link", 400),
+    mensagem: txt(fd, "mensagem"),
+  };
   const cv = fd.get("curriculo");
   const erros: Record<string, string> = {};
-  if (nome.length < 2) erros.nome = "Informe seu nome.";
-  if (!EMAIL.test(email)) erros.email = "Informe um e-mail válido.";
-  if (!vaga) erros.vaga = "Escolha uma vaga ou o banco de talentos.";
+  if (valores.nome.length < 2) erros.nome = "Informe seu nome.";
+  if (!EMAIL.test(valores.email)) erros.email = "Informe um e-mail válido.";
+  if (!valores.vaga) erros.vaga = "Escolha uma vaga ou o banco de talentos.";
   if (!(cv instanceof File) || cv.size === 0) erros.curriculo = "Anexe seu currículo.";
   else if (!CV_TIPOS.includes(cv.type)) erros.curriculo = "Envie o currículo em PDF ou Word.";
   else if (cv.size > CV_MAX) erros.curriculo = "O arquivo deve ter no máximo 4 MB.";
   if (!fd.get("consentimento")) erros.consentimento = "É preciso autorizar o uso dos dados para o processo seletivo.";
-  const valores = { nome, email, vaga, telefone: txt(fd, "telefone"), cidade: txt(fd, "cidade"), link: txt(fd, "link"), mensagem: txt(fd, "mensagem") };
   if (Object.keys(erros).length) return { ok: false, mensagem: "Revise os campos destacados.", erros, valores };
 
-  // TODO(publicação): salvar o currículo (Vercel Blob) e a candidatura (Neon).
-  console.info("[candidatura]", { vaga, tamanhoCv: (cv as File).size });
+  try {
+    const arquivo = await enviarArquivo(cv as File, "curriculos");
+    await db.insert(schema.mensagens).values({
+      tipo: "candidatura",
+      nome: valores.nome,
+      email: valores.email,
+      telefone: valores.telefone,
+      assunto: valores.vaga,
+      mensagem: valores.mensagem,
+      extra: { cidade: valores.cidade, link: valores.link },
+      arquivo: arquivo.url,
+    });
+  } catch (e) {
+    console.error("[candidatura]", e);
+    return { ok: false, mensagem: "Não foi possível enviar agora. Tente novamente em instantes.", valores };
+  }
 
   return {
     ok: true,
-    mensagem: `Obrigado, ${nome.split(" ")[0]}! Recebemos sua candidatura e entraremos em contato se o seu perfil combinar com a vaga.`,
+    mensagem: `Obrigado, ${valores.nome.split(" ")[0]}! Recebemos sua candidatura e entraremos em contato se o seu perfil combinar com a vaga.`,
   };
 }

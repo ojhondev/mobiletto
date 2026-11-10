@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { enviarCandidatura, enviarContato, type EstadoForm } from "@/app/actions";
-import { categorias, segmentos, vagas } from "@/content/site";
 import { botaoClasses } from "./Botao";
 import { cn } from "@/lib/utils";
 
@@ -61,11 +60,13 @@ function Consentimento({ erro, texto }: { erro?: string; texto: React.ReactNode 
   );
 }
 
-function Sucesso({ estado, novo }: { estado: NonNullable<EstadoForm>; novo: () => void }) {
+function Sucesso({ estado, novo, extra }: { estado: NonNullable<EstadoForm>; novo: () => void; extra?: string }) {
   return (
     <div className="grid justify-items-start gap-5 border-t-2 border-azul bg-marfim-suave p-8" role="status">
       <CheckCircle2 className="size-8 text-azul" strokeWidth={1.4} />
-      <p className="max-w-[40ch] text-[22px] leading-snug">{estado.mensagem}</p>
+      <p className="max-w-[40ch] text-[22px] leading-snug">
+        {estado.mensagem} {extra}
+      </p>
       <button type="button" onClick={novo} className={botaoClasses("fantasma")}>
         Enviar outra mensagem
       </button>
@@ -82,27 +83,63 @@ const ASSUNTOS = [
   { id: "outro", label: "Outro assunto" },
 ];
 
-export function FormContato({ origem = "fale-conosco", assuntoPadrao = "orcamento" }: { origem?: string; assuntoPadrao?: string }) {
+type Opcao = { slug: string; nome: string };
+
+export function FormContato({
+  origem = "fale-conosco",
+  assuntoPadrao = "orcamento",
+  segmentos = [],
+  sucesso,
+}: {
+  origem?: string;
+  assuntoPadrao?: string;
+  segmentos?: Opcao[];
+  /** frase depois do "Obrigado" (editável no painel) */
+  sucesso?: string;
+}) {
   const [chave, setChave] = useState(0);
-  return <FormContatoInterno key={chave} origem={origem} assuntoPadrao={assuntoPadrao} novo={() => setChave((k) => k + 1)} />;
+  return (
+    <FormContatoInterno
+      key={chave}
+      origem={origem}
+      assuntoPadrao={assuntoPadrao}
+      segmentos={segmentos}
+      sucesso={sucesso}
+      novo={() => setChave((k) => k + 1)}
+    />
+  );
 }
 
-function FormContatoInterno({ origem, assuntoPadrao, novo }: { origem: string; assuntoPadrao: string; novo: () => void }) {
+function FormContatoInterno({
+  origem,
+  assuntoPadrao,
+  segmentos,
+  sucesso,
+  novo,
+}: {
+  origem: string;
+  assuntoPadrao: string;
+  segmentos: Opcao[];
+  sucesso?: string;
+  novo: () => void;
+}) {
   const [estado, acao, enviando] = useActionState(enviarContato, null);
   const [assunto, setAssunto] = useState(assuntoPadrao);
   const [mensagem, setMensagem] = useState("");
 
-  // ?assunto=… e ?categoria=… vindos dos botões do site já preenchem o formulário
+  // ?assunto=…, ?categoria=… e ?produto=… vindos dos botões do site já preenchem o formulário
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
     const a = q.get("assunto");
     // eslint-disable-next-line react-hooks/set-state-in-effect -- parâmetros da URL só existem no cliente
     if (a && ASSUNTOS.some((x) => x.id === a)) setAssunto(a);
-    const cat = categorias.find((c) => c.id === q.get("categoria"));
-    if (cat) setMensagem(`Gostaria de um orçamento para: ${cat.nome}.\n\n`);
+    const produto = q.get("produto");
+    const categoria = q.get("categoria");
+    if (produto) setMensagem(`Gostaria de um orçamento do produto: ${produto}.\n\nQuantidade aproximada: \nPrazo da obra: \n`);
+    else if (categoria) setMensagem(`Gostaria de um orçamento para: ${categoria}.\n\n`);
   }, []);
 
-  if (estado?.ok) return <Sucesso estado={estado} novo={novo} />;
+  if (estado?.ok) return <Sucesso estado={estado} novo={novo} extra={sucesso} />;
   const e = estado?.erros ?? {};
   const v = estado?.valores ?? {};
 
@@ -136,7 +173,7 @@ function FormContatoInterno({ origem, assuntoPadrao, novo }: { origem: string; a
           <select id="segmento" name="segmento" className="campo" defaultValue={v.segmento ?? ""}>
             <option value="">Selecione</option>
             {segmentos.map((s) => (
-              <option key={s.id} value={s.id}>
+              <option key={s.slug} value={s.slug}>
                 {s.nome}
               </option>
             ))}
@@ -178,12 +215,12 @@ function FormContatoInterno({ origem, assuntoPadrao, novo }: { origem: string; a
   );
 }
 
-export function FormCandidatura() {
+export function FormCandidatura({ vagas }: { vagas: { slug: string; titulo: string }[] }) {
   const [chave, setChave] = useState(0);
-  return <FormCandidaturaInterno key={chave} novo={() => setChave((k) => k + 1)} />;
+  return <FormCandidaturaInterno key={chave} vagas={vagas} novo={() => setChave((k) => k + 1)} />;
 }
 
-function FormCandidaturaInterno({ novo }: { novo: () => void }) {
+function FormCandidaturaInterno({ vagas, novo }: { vagas: { slug: string; titulo: string }[]; novo: () => void }) {
   const [estado, acao, enviando] = useActionState(enviarCandidatura, null);
   const [vaga, setVaga] = useState("");
 
@@ -191,12 +228,12 @@ function FormCandidaturaInterno({ novo }: { novo: () => void }) {
   useEffect(() => {
     const ler = () => {
       const v = new URLSearchParams(window.location.hash.split("?")[1] ?? "").get("vaga");
-      if (v) setVaga(v);
+      if (v) setVaga(vagas.find((x) => x.slug === v)?.titulo ?? v);
     };
     ler();
     window.addEventListener("hashchange", ler);
     return () => window.removeEventListener("hashchange", ler);
-  }, []);
+  }, [vagas]);
 
   if (estado?.ok) return <Sucesso estado={estado} novo={novo} />;
   const e = estado?.erros ?? {};
@@ -222,7 +259,7 @@ function FormCandidaturaInterno({ novo }: { novo: () => void }) {
           <select id="vaga" name="vaga" className="campo" value={vaga} onChange={(ev) => setVaga(ev.target.value)} aria-invalid={!!e.vaga}>
             <option value="">Selecione</option>
             {vagas.map((v) => (
-              <option key={v.id} value={v.id}>
+              <option key={v.slug} value={v.titulo}>
                 {v.titulo}
               </option>
             ))}

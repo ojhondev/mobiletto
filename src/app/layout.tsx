@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Sans } from "next/font/google";
+import { IBM_Plex_Mono, Instrument_Sans } from "next/font/google";
+import { getSecao } from "@/lib/cms/dados";
 import "./globals.css";
 
 const sans = Instrument_Sans({
@@ -8,21 +9,23 @@ const sans = Instrument_Sans({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://www.mobiletto.com.br"),
-  title: {
-    default: "Mobiletto · Mobiliário corporativo sob medida",
-    template: "%s · Mobiletto",
-  },
-  description:
-    "Mobiliário corporativo para escritórios, empresas, recepções, hotéis e restaurantes. Projeto, fabricação própria e instalação — do simples ao sofisticado.",
-  openGraph: {
-    type: "website",
-    locale: "pt_BR",
-    siteName: "Mobiletto",
-    images: ["/brand/mobiletto-assinatura-azul.png"],
-  },
-};
+/** Só para a assinatura "Desenvolvido por @ojhondev" no rodapé. */
+const mono = IBM_Plex_Mono({
+  variable: "--font-plex",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
+});
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getSecao("seo");
+  return {
+    metadataBase: new URL("https://www.mobiletto.com.br"),
+    title: { default: seo.titulo, template: "%s · Mobiletto" },
+    description: seo.descricao,
+    openGraph: { type: "website", locale: "pt_BR", siteName: "Mobiletto", images: seo.imagem ? [seo.imagem] : [] },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#1d344b",
@@ -30,7 +33,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="pt-BR" className={`${sans.variable} h-full`}>
+    <html lang="pt-BR" className={`${sans.variable} ${mono.variable} h-full`}>
       <body className="min-h-full font-sans">{children}</body>
     </html>
   );

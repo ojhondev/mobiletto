@@ -1,52 +1,64 @@
 @AGENTS.md
 
-# Mobiletto — site institucional
+# Mobiletto — site institucional + painel
 
 Mobiliário corporativo (escritórios, empresas, recepções, hotéis, restaurantes,
 áreas comuns) — projeto, fabricação própria e instalação, do simples ao
 sofisticado. O site deve passar **robustez**, não "design de interiores delicado".
+**Todo o conteúdo é editável pela equipe no painel (`/painel`).**
 
-- Stack: Next.js 16 (App Router, `cacheComponents`) + Tailwind v4. Sem banco ainda
-  (Neon/Vercel/admin entram na publicação; o domínio atual está na Wix).
+- Stack: Next.js 16 (App Router, Server Actions; `cacheComponents` **desligado**) +
+  Tailwind v4 + Neon Postgres/Drizzle + Vercel Blob. Domínio atual na Wix (migrar na publicação).
 - Dev: `npm run dev -- -p 3017` (config `mobiletto` em `A:\Velo\.claude\launch.json`).
+- Banco: `npm run db:push` (aplica `src/lib/db/schema.ts`), `npm run db:seed` (carga
+  inicial idempotente; cria o 1º admin e grava a senha provisória em `.cache/acesso-inicial.txt`).
+- Env (Vercel + `.env.local` via `vercel env pull`): `DATABASE_URL`(+ vars Neon),
+  `BLOB_READ_WRITE_TOKEN` (store `mobiletto-midia`, público, gru1), `AUTH_SECRET`.
+
+## Como o conteúdo funciona
+- `src/lib/cms/secoes.ts` — **seções** de texto/imagem de cada página: campos do
+  formulário + conteúdo padrão. Valor salvo (tabela `secoes`) é mesclado por cima do
+  padrão (`getSecao`). Para criar um campo novo no site: adicionar aqui e ler na página.
+- `src/lib/cms/entidades.ts` — **itens** (produtos, categorias, segmentos, cases,
+  vagas): campos com o MESMO nome das colunas do banco.
+- `src/lib/cms/campos.ts` — tipos de campo (texto, textarea, imagem, imagens, vídeo,
+  lista, booleano, select, itens). O painel monta os formulários a partir disso
+  (`components/painel/EditorCampos.tsx`) — não escrever formulário por tela.
+- Site estático; toda ação do painel chama `revalidatePath("/", "layout")` → o site
+  atualiza na hora. Consultas públicas em `src/lib/cms/dados.ts`.
+- `src/content/site.ts` é só a fonte do seed.
+
+## Painel (`src/app/painel`)
+- Login próprio: cookie HMAC + scrypt (`src/lib/auth.ts`). Papéis: `admin` (inclui
+  usuários) e `editor`. Senha provisória obriga troca no 1º acesso. **Toda server action
+  confere a sessão** (`exigirUsuario`/`exigirAdmin`). Consultas do painel em `src/lib/painel.ts`.
+- Uploads: navegador comprime (WebP, ≤2400px) e envia **direto ao Blob** via
+  `/api/painel/upload` (token só para logado) → `registrarMidia`. Evita o limite de 4,5MB.
+- Formulários públicos gravam em `mensagens` (caixa de entrada); currículo vai ao Blob
+  em `curriculos/` com nome aleatório (store é público — link só aparece no painel).
+- Futuro: mover o painel para um subdomínio.
 
 ## Design = Nornorm (nornorm.com), com a identidade Mobiletto
-- Estrutura, componentes e ritmo copiados da Nornorm (style guide Refero
-  `0769ff4c…`): hero full-bleed com texto central e par de botões, faixa branca
-  sobreposta ao hero, cards "01." com foto P&B, grade "O MOBILIÁRIO | O SERVIÇO",
-  galeria em retrato com setas circulares, número em colchetes, FAQ em
-  details/summary, faixa escura com foto, rodapé com símbolo grande.
-- Cor de destaque da Nornorm (cobalto) → **Deep Blue #1D344B** (`azul`), usado só em
-  logo, botão primário, estados ativos e rótulos. Fundos: branco e
-  `marfim-suave #F8F6F1`. Texto `tinta`, secundário `pedra #6a6a6a`.
-- Tipografia: **Instrument Sans** (fonte de texto do manual) em tudo, tracking
-  **-0.03em** global (assinatura da referência). Escala: `text-display/h1/h2/h3/lead`.
-- Botões (`components/site/Botao.tsx`): cantos 6px, sem sombra; só o primário é
-  preenchido. Fotos sempre com canto reto (`.foto`). Layout fluido (`.shell`).
+- Estrutura/componentes da Nornorm (style guide Refero `0769ff4c…`). Destaque
+  **Deep Blue #1D344B** (`azul`); fundos branco/`marfim-suave`; **Instrument Sans** com
+  tracking **-0.03em** (o painel usa tracking normal via `.painel`).
+- Botões cantos 6px, sem sombra. Fotos canto reto (`.foto`). Layout fluido (`.shell`).
+- Movimento: fotos "abrem" (clip-path) ao entrar na tela (`.reveal .foto`), faixa de
+  segmentos em loop (`Marquee`), contadores (`Contador`), galeria arrastável, overlay
+  azul-escuro no hover de fotos com texto (`.foto-texto` / `.foto-hover`). Tudo respeita
+  `prefers-reduced-motion`.
+- Rodapé: link "Painel administrativo" + "Desenvolvido por @ojhondev" (IBM Plex Mono,
+  wa.me/5514998570045).
 
 ## Marca
-- Logos em `public/brand/` foram **extraídos do PDF do manual** (imagens embutidas +
-  SMask, via MuPDF) — nunca redesenhar. O wordmark marfim é um recorte exato da
-  assinatura marfim. Material bruto em `.brand-src/` (gitignored).
-- Produtos reais (renders enviados pela Mobiletto) em `public/produtos/`; fotos de
-  ambiente do Unsplash (licença livre) em `public/images/` são provisórias.
-- Hero da home: vídeo `public/video/hero.{webm,mp4}` (sem áudio) com camada preta
-  `bg-black/55` para legibilidade.
-
-## Estrutura
-- `src/content/site.ts` — TODO o conteúdo (segmentos, cases, catálogo, FAQ, vagas,
-  contatos). Itens `// confirmar` são placeholders a validar com o cliente.
-- `src/app/(site)/` — páginas: home, sobre-nos, catalogo, cases (+ [slug]),
-  trabalhe-conosco, fale-conosco, politica-de-privacidade, **linha-especial (oculta:
-  noindex, fora do menu e do sitemap)**.
-- `src/app/actions.ts` — Server Actions dos formulários: por enquanto só validam;
-  gravar no Neon / Blob e enviar e-mail fica para a publicação.
-- `src/catalogo-completo/` — protótipo do catálogo "físico" (flipbook 3D),
-  **estacionado**: vai virar a página "Catálogo Completo" depois. Sem rota hoje; ao
-  reativar, reimportar `catalog.css` e voltar a fonte Fraunces (usa os tokens antigos
-  `paper/ink/clay/sand/moss/stone`).
+- Logos em `public/brand/` foram **extraídos do PDF do manual** (MuPDF) — nunca
+  redesenhar. Material bruto em `.brand-src/` (gitignored).
+- Produtos reais em `public/produtos/`; fotos de ambiente do Unsplash em `public/images/`
+  (provisórias). Hero: vídeo `public/video/hero.{webm,mp4}` + camada preta.
 
 ## Atenção
+- Fichas técnicas dos produtos e cases/vagas/contatos/números são **referências** a
+  validar com a Mobiletto (editar pelo painel).
+- `src/catalogo-completo/` — flipbook 3D do protótipo, **estacionado** (futura página
+  "Catálogo Completo"; reimportar `catalog.css` e a fonte Fraunces ao reativar).
 - Não usar `text-muted` (colide com o token do shadcn).
-- `cacheComponents`: nada de `new Date()` em Server Component; `useSearchParams` só
-  dentro de `<Suspense>` (ver `CasesGrid`).

@@ -1,11 +1,6 @@
 /**
- * Conteúdo do site Mobiletto.
- *
- * Tudo que a equipe vai editar pelo admin mora aqui por enquanto; quando o
- * banco (Neon) entrar, este arquivo vira a camada de dados.
- *
- * ⚠️ PLACEHOLDER: números, cases, vagas e contatos marcados com `// confirmar`
- * são de exemplo e precisam ser validados com a Mobiletto antes de publicar.
+ * Conteúdo-base usado SÓ pelo seed (scripts/seed.ts) para popular o banco.
+ * O site lê tudo do banco (src/lib/cms) e a equipe edita pelo painel (/painel).
  */
 
 export const contato = {
