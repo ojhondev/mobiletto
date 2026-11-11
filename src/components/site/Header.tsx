@@ -187,7 +187,7 @@ export function Header({
             <Link href="/fale-conosco" className="hidden rounded-lg px-3 py-2 text-[15px] font-medium transition-opacity hover:opacity-70 md:block">
               Fale conosco
             </Link>
-            <Link href="/fale-conosco?assunto=orcamento" className={botaoClasses("primario", "hidden h-10 px-5 sm:inline-flex")}>
+            <Link href="/fale-conosco?assunto=orcamento" className={botaoClasses("primario", "hidden h-10 min-h-10 px-5 sm:inline-flex")}>
               Solicitar orçamento
             </Link>
             <button

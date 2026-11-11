@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 type Variante = "primario" | "fantasma" | "claro" | "contorno-claro";
 
 const base =
-  "inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-[6px] px-6 text-[15px] font-medium transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azul disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex h-11 min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-[6px] px-6 text-[15px] font-medium transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azul disabled:pointer-events-none disabled:opacity-50";
 
 const variantes: Record<Variante, string> = {
   primario: "bg-azul text-white hover:bg-azul-escuro",

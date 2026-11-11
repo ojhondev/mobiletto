@@ -92,8 +92,8 @@ export const SECOES = {
       { tipo: "texto", nome: "mensagemWhatsapp", rotulo: "Mensagem inicial do WhatsApp" },
     ],
     padrao: {
-      whatsapp: "5500000000000",
-      whatsappLabel: "(00) 00000-0000",
+      whatsapp: "5531986951132",
+      whatsappLabel: "(31) 98695-1132",
       telefone: "(00) 0000-0000",
       email: "contato@mobiletto.com.br",
       emailCarreiras: "carreiras@mobiletto.com.br",
