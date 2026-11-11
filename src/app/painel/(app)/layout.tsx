@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { exigirUsuario } from "@/lib/auth";
-import { mensagensNovas } from "@/lib/painel";
+import { contarLeadsNovos, dataHora, mensagensNovas, ultimaPublicacao } from "@/lib/painel";
 import { Shell } from "@/components/painel/Shell";
 
 export const metadata: Metadata = {
@@ -10,9 +10,9 @@ export const metadata: Metadata = {
 
 export default async function PainelLayout({ children }: LayoutProps<"/painel">) {
   const usuario = await exigirUsuario();
-  const novas = await mensagensNovas();
+  const [novas, leads, publicacao] = await Promise.all([mensagensNovas(), contarLeadsNovos(), ultimaPublicacao()]);
   return (
-    <Shell usuario={usuario} novas={novas}>
+    <Shell usuario={usuario} novas={novas} leads={leads} ultimaPublicacao={publicacao ? dataHora(publicacao.em).replace(/\/\d{4}/, "") : null}>
       {children}
     </Shell>
   );

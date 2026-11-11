@@ -147,7 +147,21 @@ export const mensagens = pgTable("mensagens", {
   criadoEm: timestamp("criado_em").notNull().defaultNow(),
 });
 
+/** Leads do popup de orçamento (nome, e-mail e WhatsApp). */
+export const leads = pgTable("leads", {
+  id: serial("id").primaryKey(),
+  nome: text("nome").notNull(),
+  email: text("email").notNull(),
+  whatsapp: text("whatsapp").notNull(),
+  /** página em que o lead estava quando preencheu */
+  origem: text("origem").notNull().default(""),
+  status: text("status").$type<"novo" | "em-contato" | "convertido" | "descartado">().notNull().default("novo"),
+  anotacoes: text("anotacoes").notNull().default(""),
+  criadoEm: timestamp("criado_em").notNull().defaultNow(),
+});
+
 export type Usuario = typeof usuarios.$inferSelect;
+export type Lead = typeof leads.$inferSelect;
 export type Segmento = typeof segmentos.$inferSelect;
 export type Categoria = typeof categorias.$inferSelect;
 export type Produto = typeof produtos.$inferSelect;

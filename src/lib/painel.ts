@@ -47,15 +47,16 @@ export async function nomesCategorias() {
 }
 
 export async function contagens() {
-  const [prod, cat, cs, vg, mid, novas] = await Promise.all([
+  const [prod, cat, cs, vg, mid, novas, leadsNovos] = await Promise.all([
     db.select({ n: count() }).from(schema.produtos),
     db.select({ n: count() }).from(schema.categorias),
     db.select({ n: count() }).from(schema.cases),
     db.select({ n: count() }).from(schema.vagas),
     db.select({ n: count() }).from(schema.midias),
     db.select({ n: count() }).from(schema.mensagens).where(eq(schema.mensagens.status, "nova")),
+    db.select({ n: count() }).from(schema.leads).where(eq(schema.leads.status, "novo")),
   ]);
-  return { produtos: prod[0].n, categorias: cat[0].n, cases: cs[0].n, vagas: vg[0].n, midias: mid[0].n, novas: novas[0].n };
+  return { produtos: prod[0].n, categorias: cat[0].n, cases: cs[0].n, vagas: vg[0].n, midias: mid[0].n, novas: novas[0].n, leadsNovos: leadsNovos[0].n };
 }
 
 export async function mensagensNovas() {
@@ -109,4 +110,24 @@ export function dataHora(d: Date | string | null | undefined) {
   return new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(
     new Date(d),
   );
+}
+
+export async function contarLeadsNovos() {
+  const [r] = await db.select({ n: count() }).from(schema.leads).where(eq(schema.leads.status, "novo"));
+  return r.n;
+}
+
+export async function listarLeads(status?: string) {
+  return db
+    .select()
+    .from(schema.leads)
+    .where(status ? eq(schema.leads.status, status as "novo") : undefined)
+    .orderBy(desc(schema.leads.criadoEm));
+}
+
+/** Quando o site foi publicado pela última vez (qualquer salvamento ou o botão do topo). */
+export async function ultimaPublicacao() {
+  const [r] = await db.select().from(schema.secoes).where(eq(schema.secoes.chave, "_publicacao")).limit(1);
+  const v = r?.valor as { em?: string; por?: string } | undefined;
+  return v?.em ? { em: v.em, por: v.por ?? "" } : null;
 }

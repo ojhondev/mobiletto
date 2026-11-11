@@ -131,7 +131,7 @@ export function EditorEntidade({
       inicial={inicial}
       opcoes={opcoes}
       salvar={(dados) => salvarEntidade(tipo, id, dados)}
-      rotuloSalvar={id ? "Salvar alterações" : "Criar"}
+      rotuloSalvar={id ? "Salvar e publicar" : "Criar e publicar"}
       depoisDeSalvar={(r) => {
         if (!id && r.id) router.replace(`/painel/${tipo}/${r.id}`);
         else router.refresh();

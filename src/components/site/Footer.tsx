@@ -1,8 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getSecao, linkWhatsapp, segmentosPublicados } from "@/lib/cms/dados";
-
-const OJHONDEV_WHATSAPP = "https://wa.me/5514998570045";
+import { Credito } from "./Credito";
 
 export async function Footer() {
   const [contato, segs] = await Promise.all([getSecao("contato"), segmentosPublicados()]);
@@ -82,14 +81,7 @@ export async function Footer() {
             <Link href="/painel" className="hover:text-azul">
               Painel administrativo
             </Link>
-            <a
-              href={OJHONDEV_WHATSAPP}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-[family-name:var(--font-plex)] tracking-normal text-pedra transition-colors hover:text-tinta"
-            >
-              Desenvolvido por <strong className="font-bold text-tinta">@ojhondev</strong>
-            </a>
+            <Credito />
           </div>
         </div>
       </div>

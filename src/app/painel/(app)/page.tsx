@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, FileText, Images, Inbox, Package, PanelsTopLeft, Plus } from "lucide-react";
+import { ArrowRight, FileText, Inbox, Magnet, Package, PanelsTopLeft, Plus } from "lucide-react";
 import { exigirUsuario } from "@/lib/auth";
 import { contagens, dataHora, ultimasMensagens } from "@/lib/painel";
 import { Cartao, Selo, cls } from "@/components/painel/ui";
@@ -12,17 +12,17 @@ export default async function Painel({ searchParams }: PageProps<"/painel">) {
   const negado = (await searchParams).negado;
 
   const cards = [
+    { href: "/painel/leads?status=novo", label: "Leads novos (popup)", valor: n.leadsNovos, icone: Magnet, destaque: n.leadsNovos > 0 },
     { href: "/painel/mensagens?status=nova", label: "Mensagens novas", valor: n.novas, icone: Inbox, destaque: n.novas > 0 },
     { href: "/painel/produtos", label: "Produtos no catálogo", valor: n.produtos, icone: Package },
-    { href: "/painel/cases", label: "Cases publicados", valor: n.cases, icone: FileText },
-    { href: "/painel/midia", label: "Arquivos na biblioteca", valor: n.midias, icone: Images },
+    { href: "/painel/cases", label: "Cases", valor: n.cases, icone: FileText },
   ];
 
   const atalhos = [
     { href: "/painel/produtos/novo", label: "Novo produto" },
     { href: "/painel/cases/novo", label: "Novo case" },
     { href: "/painel/paginas/home.hero", label: "Editar a home" },
-    { href: "/painel/midia", label: "Enviar imagens" },
+    { href: "/painel/paginas/popup", label: "Editar o popup" },
     { href: "/painel/vagas/novo", label: "Nova vaga" },
     { href: "/painel/paginas/contato", label: "Contatos e WhatsApp" },
   ];

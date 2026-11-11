@@ -2,6 +2,7 @@
 export const CAMINHO_PAGINA: Record<string, string> = {
   Geral: "/",
   Home: "/",
+  "Popup de orçamento": "/",
   "Sobre nós": "/sobre-nos",
   Catálogo: "/catalogo",
   Cases: "/cases",

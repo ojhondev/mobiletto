@@ -111,3 +111,28 @@ export async function enviarCandidatura(_prev: EstadoForm, fd: FormData): Promis
     mensagem: `Obrigado, ${valores.nome.split(" ")[0]}! Recebemos sua candidatura e entraremos em contato se o seu perfil combinar com a vaga.`,
   };
 }
+
+/* --------------------------------------------------------- popup de leads */
+
+export type ResultadoLead = { ok: boolean; erros?: Partial<Record<"nome" | "email" | "whatsapp", string>> };
+
+/** Lead do popup de orçamento. O WhatsApp é aberto no navegador; aqui só gravamos para o painel. */
+export async function capturarLead(dados: { nome: string; email: string; whatsapp: string; origem: string; website?: string }): Promise<ResultadoLead> {
+  if (dados.website) return { ok: true }; // honeypot anti-spam
+  const nome = String(dados.nome ?? "").trim().slice(0, 200);
+  const email = String(dados.email ?? "").trim().toLowerCase().slice(0, 200);
+  const whatsapp = String(dados.whatsapp ?? "").trim().slice(0, 40);
+  const digitos = whatsapp.replace(/\D/g, "");
+  const erros: ResultadoLead["erros"] = {};
+  if (nome.length < 2) erros.nome = "Informe seu nome.";
+  if (!EMAIL.test(email)) erros.email = "Informe um e-mail válido.";
+  if (digitos.length < 10 || digitos.length > 13) erros.whatsapp = "Informe um WhatsApp com DDD.";
+  if (Object.keys(erros).length) return { ok: false, erros };
+  try {
+    await db.insert(schema.leads).values({ nome, email, whatsapp, origem: String(dados.origem ?? "").slice(0, 300) });
+  } catch (e) {
+    console.error("[lead]", e);
+    return { ok: false };
+  }
+  return { ok: true };
+}

@@ -465,3 +465,105 @@ select.campo {
 .painel {
   letter-spacing: -0.005em;
 }
+
+/* popup de orçamento */
+.popup-fundo {
+  animation: popup-fundo 0.35s ease both;
+}
+.popup-caixa {
+  animation: popup-caixa 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes popup-fundo {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes popup-caixa {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .popup-fundo,
+  .popup-caixa {
+    animation: none;
+  }
+}
+
+/* selo da assinatura @ojhondev: cantos "pixelados" como no selo de referência */
+.credito-selo {
+  clip-path: polygon(
+    0 4px, 4px 4px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
+    100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%,
+    4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px)
+  );
+}
+
+/* assinatura: o texto "gira" no lugar e vira o selo de CTA */
+.credito-troca {
+  display: inline-grid;
+  align-items: center;
+  justify-items: start;
+  perspective: 600px;
+}
+.credito-troca > span {
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+  transition:
+    transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1),
+    opacity 0.35s ease;
+}
+.credito-texto {
+  transform: rotateX(0deg);
+}
+.credito-cta {
+  transform: rotateX(-90deg);
+  opacity: 0;
+}
+.credito:hover .credito-texto,
+.credito:focus-visible .credito-texto {
+  transform: rotateX(90deg);
+  opacity: 0;
+}
+.credito:hover .credito-cta,
+.credito:focus-visible .credito-cta {
+  transform: rotateX(0deg);
+  opacity: 1;
+}
+/* telas de toque: alterna sozinho entre a assinatura e o convite */
+@media (hover: none) {
+  .credito-texto {
+    animation: credito-sai 7s cubic-bezier(0.2, 0.7, 0.2, 1) infinite;
+  }
+  .credito-cta {
+    animation: credito-entra 7s cubic-bezier(0.2, 0.7, 0.2, 1) infinite;
+  }
+  .credito-foto {
+    animation: credito-cor 7s ease infinite;
+  }
+}
+@keyframes credito-sai {
+  0%, 45% { transform: rotateX(0deg); opacity: 1; }
+  52%, 93% { transform: rotateX(90deg); opacity: 0; }
+  100% { transform: rotateX(0deg); opacity: 1; }
+}
+@keyframes credito-entra {
+  0%, 45% { transform: rotateX(-90deg); opacity: 0; }
+  52%, 93% { transform: rotateX(0deg); opacity: 1; }
+  100% { transform: rotateX(-90deg); opacity: 0; }
+}
+@keyframes credito-cor {
+  0%, 45%, 100% { filter: grayscale(1); opacity: 0.7; }
+  52%, 93% { filter: grayscale(0); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .credito-troca > span {
+    transition: opacity 0.2s ease;
+  }
+  .credito-texto,
+  .credito-cta,
+  .credito-foto {
+    animation: none !important;
+  }
+}

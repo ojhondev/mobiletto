@@ -14,6 +14,7 @@ import {
   Inbox,
   LayoutDashboard,
   LogOut,
+  Magnet,
   Menu,
   Package,
   PanelsTopLeft,
@@ -23,12 +24,13 @@ import {
   X,
 } from "lucide-react";
 import { sair } from "@/app/painel/acoes";
+import { PublicacaoProvider } from "./Publicacao";
 import type { UsuarioSessao } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 type Item = { href: string; label: string; icone: React.ElementType; badge?: number };
 
-function grupos(u: UsuarioSessao, novas: number): { titulo: string; itens: Item[] }[] {
+function grupos(u: UsuarioSessao, novas: number, leads: number): { titulo: string; itens: Item[] }[] {
   return [
     { titulo: "Visão geral", itens: [{ href: "/painel", label: "Painel", icone: LayoutDashboard }] },
     {
@@ -43,7 +45,14 @@ function grupos(u: UsuarioSessao, novas: number): { titulo: string; itens: Item[
         { href: "/painel/midia", label: "Biblioteca de mídia", icone: Images },
       ],
     },
-    { titulo: "Contatos", itens: [{ href: "/painel/mensagens", label: "Mensagens", icone: Inbox, badge: novas }] },
+    {
+      titulo: "Contatos",
+      itens: [
+        { href: "/painel/leads", label: "Leads do popup", icone: Magnet, badge: leads },
+        { href: "/painel/mensagens", label: "Mensagens", icone: Inbox, badge: novas },
+      ],
+    },
+    { titulo: "Captação", itens: [{ href: "/painel/paginas/popup", label: "Popup de orçamento", icone: PanelsTopLeft }] },
     {
       titulo: "Sistema",
       itens: [
@@ -56,7 +65,19 @@ function grupos(u: UsuarioSessao, novas: number): { titulo: string; itens: Item[
 
 const ativo = (pathname: string, href: string) => (href === "/painel" ? pathname === "/painel" : pathname.startsWith(href));
 
-export function Shell({ usuario, novas, children }: { usuario: UsuarioSessao; novas: number; children: React.ReactNode }) {
+export function Shell({
+  usuario,
+  novas,
+  leads,
+  ultimaPublicacao,
+  children,
+}: {
+  usuario: UsuarioSessao;
+  novas: number;
+  leads: number;
+  ultimaPublicacao: string | null;
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
   const [aberto, setAberto] = useState(false);
   // eslint-disable-next-line react-hooks/set-state-in-effect -- fecha o menu do celular ao navegar
@@ -74,7 +95,7 @@ export function Shell({ usuario, novas, children }: { usuario: UsuarioSessao; no
         </button>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4">
-        {grupos(usuario, novas).map((g) => (
+        {grupos(usuario, novas, leads).map((g) => (
           <div key={g.titulo} className="mb-5">
             <p className="mb-1.5 px-3 text-[11px] font-semibold tracking-[0.12em] text-[#8c8a84] uppercase">{g.titulo}</p>
             <ul className="grid gap-0.5">
@@ -143,14 +164,16 @@ export function Shell({ usuario, novas, children }: { usuario: UsuarioSessao; no
           <Menu className="size-5" />
         </button>
         <Image src="/brand/mobiletto-wordmark-azul.png" alt="Mobiletto" width={1600} height={293} sizes="110px" className="h-[17px] w-auto" />
-        {novas > 0 && (
+        {novas + leads > 0 && (
           <Link href="/painel/mensagens" className="ml-auto flex items-center gap-1.5 rounded-full bg-azul px-3 py-1 text-[12px] font-medium text-white">
-            <Inbox className="size-3.5" /> {novas}
+            <Inbox className="size-3.5" /> {novas + leads}
           </Link>
         )}
       </header>
       <main className="lg:pl-[264px]">
-        <div className="mx-auto w-full max-w-[1280px] px-4 py-7 md:px-8 md:py-10">{children}</div>
+        <PublicacaoProvider ultima={ultimaPublicacao}>
+          <div className="mx-auto w-full max-w-[1280px] px-4 py-7 md:px-8 md:py-10">{children}</div>
+        </PublicacaoProvider>
       </main>
       <Toaster position="bottom-right" richColors closeButton />
     </div>

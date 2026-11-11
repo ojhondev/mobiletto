@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import type { Campo, Opcao } from "@/lib/cms/campos";
 import { vazio } from "@/lib/cms/campos";
 import type { Resultado } from "@/app/painel/acoes";
+import { useRegistrarEditor } from "./Publicacao";
 import { SeletorMidia } from "./SeletorMidia";
 import { btn, cls } from "./ui";
 import { cn } from "@/lib/utils";
@@ -313,7 +314,7 @@ export function EditorCampos({
   opcoes = {},
   salvar,
   depoisDeSalvar,
-  rotuloSalvar = "Salvar alterações",
+  rotuloSalvar = "Salvar e publicar",
   extras,
 }: {
   campos: Campo[];
@@ -334,20 +335,30 @@ export function EditorCampos({
     setSujo(true);
   }, []);
 
+  /** Salva e publica; devolve se deu certo (usado também pelo botão do topo do painel). */
+  const salvarAgora = useCallback(async () => {
+    try {
+      const r = await salvar(valor);
+      if (r.ok) {
+        setSujo(false);
+        toast.success("Salvo e publicado! O site já foi atualizado.");
+        depoisDeSalvar?.(r);
+        return true;
+      }
+      toast.error(r.erro ?? "Não foi possível salvar.");
+    } catch {
+      toast.error("Não foi possível salvar. Verifique a conexão e tente de novo.");
+    }
+    return false;
+  }, [salvar, valor, depoisDeSalvar]);
+
   const enviar = useCallback(() => {
     iniciar(async () => {
-      try {
-        const r = await salvar(valor);
-        if (r.ok) {
-          setSujo(false);
-          toast.success("Salvo! O site já foi atualizado.");
-          depoisDeSalvar?.(r);
-        } else toast.error(r.erro ?? "Não foi possível salvar.");
-      } catch {
-        toast.error("Não foi possível salvar. Verifique a conexão e tente de novo.");
-      }
+      await salvarAgora();
     });
-  }, [salvar, valor, depoisDeSalvar]);
+  }, [salvarAgora]);
+
+  useRegistrarEditor({ sujo: () => sujo, salvar: salvarAgora });
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

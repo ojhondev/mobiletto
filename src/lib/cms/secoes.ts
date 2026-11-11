@@ -133,6 +133,40 @@ export const SECOES = {
     },
   }),
 
+  popup: def({
+    pagina: "Popup de orçamento",
+    titulo: "Popup de captação",
+    descricao: "Abre sozinho no site (após alguns segundos ou ao rolar a primeira tela). Os dados vão para Leads e o botão abre o WhatsApp com tudo preenchido.",
+    campos: [
+      { tipo: "booleano", nome: "ativo", rotulo: "Mostrar o popup no site" },
+      { tipo: "texto", nome: "atraso", rotulo: "Abrir depois de quantos segundos", ajuda: "Também abre quando a pessoa rola além da primeira tela, o que acontecer primeiro." },
+      { tipo: "texto", nome: "diasParaReexibir", rotulo: "Se a pessoa fechar, mostrar de novo depois de quantos dias" },
+      { tipo: "texto", nome: "rotulo", rotulo: "Rótulo (acima do título)" },
+      { tipo: "textarea", nome: "titulo", rotulo: "Título", linhas: 2 },
+      { tipo: "textarea", nome: "texto", rotulo: "Texto", linhas: 3 },
+      { tipo: "imagem", nome: "imagem", rotulo: "Imagem (lado esquerdo)" },
+      { tipo: "texto", nome: "legenda", rotulo: "Legenda sobre a imagem" },
+      { tipo: "texto", nome: "botao", rotulo: "Texto do botão" },
+      { tipo: "texto", nome: "whatsapp", rotulo: "WhatsApp que recebe (só números, com DDI)", placeholder: "5531986951132" },
+      { tipo: "textarea", nome: "mensagem", rotulo: "Início da mensagem do WhatsApp", linhas: 2, ajuda: "Nome, e-mail, WhatsApp e a página do site são acrescentados automaticamente." },
+      { tipo: "textarea", nome: "aviso", rotulo: "Aviso de privacidade (abaixo do botão)", linhas: 2 },
+    ],
+    padrao: {
+      ativo: true,
+      atraso: "4",
+      diasParaReexibir: "3",
+      rotulo: "Mobiliário corporativo sob medida",
+      titulo: "Receba um orçamento personalizado",
+      texto: "Escritórios, recepções e hotéis: conte com a Mobiletto do projeto 3D à instalação. Preencha e fale direto com um especialista no WhatsApp.",
+      imagem: "/produtos/sala-diretoria-madeira.jpg",
+      legenda: "Projeto 3D, fabricação, montagem e instalação.",
+      botao: "QUERO UM ORÇAMENTO",
+      whatsapp: "5531986951132",
+      mensagem: "Olá! Quero um orçamento personalizado de mobiliário corporativo.",
+      aviso: "Usamos seus dados apenas para o contato sobre o orçamento.",
+    },
+  }),
+
   /* ================================================================= home */
   "home.hero": def({
     pagina: "Home",
@@ -683,4 +717,4 @@ export type ChaveSecao = keyof typeof SECOES;
 export type ValorSecao<K extends ChaveSecao> = (typeof SECOES)[K]["padrao"];
 
 /** Ordem das páginas no painel. */
-export const PAGINAS = ["Geral", "Home", "Sobre nós", "Catálogo", "Cases", "Trabalhe conosco", "Fale conosco", "Linha especial", "Privacidade"];
+export const PAGINAS = ["Geral", "Popup de orçamento", "Home", "Sobre nós", "Catálogo", "Cases", "Trabalhe conosco", "Fale conosco", "Linha especial", "Privacidade"];

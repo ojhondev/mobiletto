@@ -1,10 +1,11 @@
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
+import { PopupOrcamento } from "@/components/site/PopupOrcamento";
 import { RevealObserver } from "@/components/site/Reveal";
 import { getSecoes, segmentosPublicados } from "@/lib/cms/dados";
 
 export default async function SiteLayout({ children }: LayoutProps<"/">) {
-  const [{ aviso, "linha.hero": linha }, segs] = await Promise.all([getSecoes("aviso", "linha.hero"), segmentosPublicados()]);
+  const [{ aviso, "linha.hero": linha, popup }, segs] = await Promise.all([getSecoes("aviso", "linha.hero", "popup"), segmentosPublicados()]);
   return (
     <>
       <Header
@@ -15,6 +16,7 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
       <main>{children}</main>
       <Footer />
       <RevealObserver />
+      {popup.ativo && <PopupOrcamento config={popup} />}
     </>
   );
 }

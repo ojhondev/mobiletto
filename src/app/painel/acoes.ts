@@ -18,7 +18,15 @@ import { conferirSenha, hashSenha, SENHA_MINIMA, senhaProvisoria } from "@/lib/s
 
 export type Resultado = { ok: boolean; erro?: string; id?: number | string };
 
-const atualizarSite = () => revalidatePath("/", "layout");
+/** Republica o site inteiro e registra quando isso aconteceu (mostrado no topo do painel). */
+async function atualizarSite(por?: string) {
+  revalidatePath("/", "layout");
+  const valor = { em: new Date().toISOString(), por: por ?? "" };
+  await db
+    .insert(schema.secoes)
+    .values({ chave: "_publicacao", valor, atualizadoPor: por })
+    .onConflictDoUpdate({ target: schema.secoes.chave, set: { valor, atualizadoEm: new Date(), atualizadoPor: por } });
+}
 
 const TABELAS = {
   produtos: schema.produtos,
@@ -93,14 +101,14 @@ export async function salvarSecao(chave: string, dados: Record<string, unknown>)
     .insert(schema.secoes)
     .values({ chave, valor, atualizadoPor: eu.nome })
     .onConflictDoUpdate({ target: schema.secoes.chave, set: { valor, atualizadoEm: new Date(), atualizadoPor: eu.nome } });
-  atualizarSite();
+  await atualizarSite();
   return { ok: true };
 }
 
 export async function restaurarSecao(chave: string): Promise<Resultado> {
   await exigirUsuario();
   await db.delete(schema.secoes).where(eq(schema.secoes.chave, chave));
-  atualizarSite();
+  await atualizarSite();
   return { ok: true };
 }
 
@@ -143,7 +151,7 @@ export async function salvarEntidade(tipo: string, id: number | null, dados: Rec
       .returning({ id: t.id });
     novoId = criado.id;
   }
-  atualizarSite();
+  await atualizarSite();
   return { ok: true, id: novoId ?? undefined };
 }
 
@@ -152,7 +160,7 @@ export async function excluirEntidade(tipo: string, id: number): Promise<Resulta
   if (!ehTipo(tipo)) return { ok: false, erro: "Tipo inválido." };
   const t = TABELAS[tipo];
   await db.delete(t).where(eq(t.id, id));
-  atualizarSite();
+  await atualizarSite();
   return { ok: true };
 }
 
@@ -169,7 +177,7 @@ export async function duplicarEntidade(tipo: string, id: number): Promise<Result
   copia.slug = await slugUnico(tipo, `${titulo}-copia`, null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [criado] = await db.insert(t).values(copia as any).returning({ id: t.id });
-  atualizarSite();
+  await atualizarSite();
   return { ok: true, id: criado.id };
 }
 
@@ -180,7 +188,7 @@ export async function alternarPublicado(tipo: string, id: number): Promise<Resul
   const [item] = await db.select({ publicado: t.publicado }).from(t).where(eq(t.id, id)).limit(1);
   if (!item) return { ok: false, erro: "Item não encontrado." };
   await db.update(t).set({ publicado: !item.publicado }).where(eq(t.id, id));
-  atualizarSite();
+  await atualizarSite();
   return { ok: true };
 }
 
@@ -197,7 +205,7 @@ export async function moverEntidade(tipo: string, id: number, direcao: -1 | 1): 
   if (pos < 0 || !alvo) return { ok: true };
   await db.update(t).set({ ordem: pos + direcao }).where(eq(t.id, id));
   await db.update(t).set({ ordem: pos }).where(eq(t.id, alvo.id));
-  atualizarSite();
+  await atualizarSite();
   return { ok: true };
 }
 
@@ -344,4 +352,35 @@ export async function vizinho(tipo: string, ordem: number, direcao: -1 | 1) {
     .orderBy(direcao === 1 ? asc(t.ordem) : desc(t.ordem))
     .limit(1);
   return v?.id ?? null;
+}
+
+/* ============================================================ publicação */
+
+/** Botão "Salvar e publicar" do topo do painel: força a republicação de todas as páginas. */
+export async function publicarSite(): Promise<Resultado & { em?: string }> {
+  const eu = await exigirUsuario();
+  await atualizarSite(eu.nome);
+  return { ok: true, em: new Date().toISOString() };
+}
+
+/* ================================================================ leads */
+
+export async function mudarStatusLead(id: number, status: "novo" | "em-contato" | "convertido" | "descartado"): Promise<Resultado> {
+  await exigirUsuario();
+  await db.update(schema.leads).set({ status }).where(eq(schema.leads.id, id));
+  revalidatePath("/painel", "layout");
+  return { ok: true };
+}
+
+export async function salvarAnotacoesLead(id: number, anotacoes: string): Promise<Resultado> {
+  await exigirUsuario();
+  await db.update(schema.leads).set({ anotacoes: anotacoes.slice(0, 5000) }).where(eq(schema.leads.id, id));
+  return { ok: true };
+}
+
+export async function excluirLead(id: number): Promise<Resultado> {
+  await exigirUsuario();
+  await db.delete(schema.leads).where(eq(schema.leads.id, id));
+  revalidatePath("/painel", "layout");
+  return { ok: true };
 }
