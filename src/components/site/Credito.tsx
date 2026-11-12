@@ -1,9 +1,9 @@
 import Image from "next/image";
 
-const LINK = `https://wa.me/5514998570045?text=${encodeURIComponent("Olá, Jhonatan! Vi o site da Mobiletto e quero criar meu site ou aplicativo.")}`;
+const LINK = "https://www.devjhon.tech";
 
 /**
- * Assinatura "Desenvolvido por @ojhondev" do rodapé.
+ * Assinatura "Desenvolvido por @devjhon" do rodapé — leva para www.devjhon.tech.
  * Discreta em P&B; no hover a foto ganha cor e o texto "gira" no mesmo lugar,
  * virando o selo "Crie seu site ou aplicativo agora, fale comigo".
  * Em telas de toque (sem hover) os dois se alternam sozinhos.
@@ -13,9 +13,9 @@ export function Credito() {
     <a
       href={LINK}
       target="_blank"
-      rel="noopener noreferrer"
+      rel="noopener"
       className="credito group inline-flex items-center gap-2.5 font-[family-name:var(--font-plex)] tracking-normal"
-      aria-label="Desenvolvido por @ojhondev — crie seu site ou aplicativo agora, fale comigo no WhatsApp"
+      aria-label="Mobiletto — desenvolvido por @devjhon. Crie seu site ou aplicativo: www.devjhon.tech"
     >
       <span className="relative shrink-0">
         <Image
@@ -30,7 +30,7 @@ export function Credito() {
       </span>
       <span className="credito-troca" aria-hidden>
         <span className="credito-texto text-pedra">
-          Desenvolvido por <strong className="font-bold text-tinta">@ojhondev</strong>
+          Desenvolvido por <strong className="font-bold text-tinta">@devjhon</strong>
         </span>
         <span className="credito-cta credito-selo bg-[#0E1014] px-3 py-1.5 text-[11px] font-medium tracking-[0.06em] whitespace-nowrap text-[#7cf5a8] uppercase">
           Crie seu site ou aplicativo agora, fale comigo

@@ -9,7 +9,7 @@ const sans = Instrument_Sans({
   display: "swap",
 });
 
-/** Só para a assinatura "Desenvolvido por @ojhondev" no rodapé. */
+/** Só para a assinatura "Desenvolvido por @devjhon" no rodapé. */
 const mono = IBM_Plex_Mono({
   variable: "--font-plex",
   subsets: ["latin"],
